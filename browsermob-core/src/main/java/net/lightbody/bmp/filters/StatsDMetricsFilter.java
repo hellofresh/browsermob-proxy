@@ -45,7 +45,7 @@ public class StatsDMetricsFilter extends HttpsAwareFiltersAdapter {
                 String url = HTTP_RESPONSE_STACK.pop();
                 try {
                     URI uri = new URI(url);
-                    metric = "proxy.".concat(uri.getHost().concat(uri.getPath()));
+                    metric = "proxy.".concat(uri.getHost().replaceAll("\\.", "_").concat(uri.getPath())).replaceAll("/", "_").concat(String.format(".%s", status));
                     client.increment(metric);
                     HTTP_RESPONSE_STACK.clear();
                 } catch (URISyntaxException e) {
