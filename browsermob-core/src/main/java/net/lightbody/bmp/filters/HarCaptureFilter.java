@@ -174,7 +174,7 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
             responseCaptureFilter = null;
         }
 
-        statsDClient.set(new NonBlockingStatsDClient("automated_tests", getStatsDHost(), getStatsDPort()));
+        createStatsDClient();
 
         this.har = har;
 
@@ -286,6 +286,7 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
         // replace any existing HarResponse that was created if the server sent a partial response
         HarResponse response = HarCaptureUtil.createHarResponseForFailure();
         harEntry.setResponse(response);
+        createStatsDClient();
         statsDClient.get().increment(getProxyPrefix().concat(prepareMetric(harEntry.getRequest().getUrl()))
                 .concat("." + harEntry.getResponse().getStatus()).concat(".response_timeout"));
 
@@ -661,6 +662,7 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
     public void proxyToServerResolutionFailed(String hostAndPort) {
         HarResponse response = HarCaptureUtil.createHarResponseForFailure();
         harEntry.setResponse(response);
+        createStatsDClient();
         statsDClient.get().increment(getProxyPrefix().concat(prepareMetric(harEntry.getRequest().getUrl()))
                 .concat("." + harEntry.getResponse().getStatus()).concat(".server_resolution_fail"));
 
@@ -704,6 +706,7 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
     @Override
     public void proxyToServerConnectionFailed() {
         HarResponse response = HarCaptureUtil.createHarResponseForFailure();
+        createStatsDClient();
         statsDClient.get().increment(getProxyPrefix().concat(prepareMetric(harEntry.getRequest().getUrl()))
                 .concat("." + harEntry.getResponse().getStatus()).concat(".server_connection_fail"));
         harEntry.setResponse(response);
@@ -775,6 +778,13 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
             harEntry.getTimings().setReceive(responseReceivedNanos - responseReceiveStartedNanos, TimeUnit.NANOSECONDS);
         } else {
             harEntry.getTimings().setReceive(0L, TimeUnit.NANOSECONDS);
+        }
+    }
+
+
+    private void createStatsDClient() {
+        if (statsDClient.get() == null) {
+            statsDClient.set(new NonBlockingStatsDClient("automated_tests", getStatsDHost(), getStatsDPort()));
         }
     }
 }
