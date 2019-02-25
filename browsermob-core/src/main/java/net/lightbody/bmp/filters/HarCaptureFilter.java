@@ -2,6 +2,8 @@ package net.lightbody.bmp.filters;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.BaseEncoding;
+import com.timgroup.statsd.NonBlockingStatsDClient;
+import com.timgroup.statsd.StatsDClient;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpContent;
@@ -44,8 +46,12 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static net.lightbody.bmp.filters.StatsDMetricsFilter.*;
+import static net.lightbody.bmp.filters.StatsDMetricsFilter.getStatsDPort;
+
 public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
     private static final Logger log = LoggerFactory.getLogger(HarCaptureFilter.class);
+    private static final StatsDClient statsDClient = new NonBlockingStatsDClient("automated_tests", getStatsDHost(), getStatsDPort());
 
     /**
      * The currently active HAR at the time the current request is received.
@@ -123,16 +129,16 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
      * <p/>
      * Regardless of the CaptureTypes specified in <code>dataToCapture</code>, the HarCaptureFilter will always capture:
      * <ul>
-     *     <li>Request and response sizes</li>
-     *     <li>HTTP request and status lines</li>
-     *     <li>Page timing information</li>
+     * <li>Request and response sizes</li>
+     * <li>HTTP request and status lines</li>
+     * <li>Page timing information</li>
      * </ul>
      *
      * @param originalRequest the original HttpRequest from the HttpFiltersSource factory
-     * @param har a reference to the ProxyServer's current HAR file at the time this request is received (can be null if HAR capture is not required)
-     * @param currentPageRef the ProxyServer's currentPageRef at the time this request is received from the client
-     * @param dataToCapture the data types to capture for this request. null or empty set indicates only basic information will be
-     *                      captured (see {@link net.lightbody.bmp.proxy.CaptureType} for information on data collected for each CaptureType)
+     * @param har             a reference to the ProxyServer's current HAR file at the time this request is received (can be null if HAR capture is not required)
+     * @param currentPageRef  the ProxyServer's currentPageRef at the time this request is received from the client
+     * @param dataToCapture   the data types to capture for this request. null or empty set indicates only basic information will be
+     *                        captured (see {@link net.lightbody.bmp.proxy.CaptureType} for information on data collected for each CaptureType)
      */
     public HarCaptureFilter(HttpRequest originalRequest, ChannelHandlerContext ctx, Har har, String currentPageRef, Set<CaptureType> dataToCapture) {
         super(originalRequest, ctx);
@@ -198,6 +204,7 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
             // for any other reason. having a "default" HarResponse prevents us from generating an invalid HAR.
             HarResponse defaultHarResponse = HarCaptureUtil.createHarResponseForFailure();
             defaultHarResponse.setError(HarCaptureUtil.getNoResponseReceivedErrorMessage());
+            statsDClient.increment(getProxyPrefix().concat("client_proxy_connection_fail.").concat(prepareMetric(harEntry.getRequest().getUrl())).concat(harEntry.getResponse().getStatusText()));
             harEntry.setResponse(defaultHarResponse);
 
             captureQueryParameters(httpRequest);
@@ -278,6 +285,7 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
         // replace any existing HarResponse that was created if the server sent a partial response
         HarResponse response = HarCaptureUtil.createHarResponseForFailure();
         harEntry.setResponse(response);
+        statsDClient.increment(getProxyPrefix().concat("response_timeout.").concat(prepareMetric(harEntry.getRequest().getUrl())).concat(harEntry.getResponse().getStatusText()));
 
         response.setError(HarCaptureUtil.getResponseTimedOutErrorMessage());
 
@@ -408,7 +416,7 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
 
         Charset charset;
         try {
-             charset = BrowserMobHttpUtil.readCharsetInContentTypeHeader(contentType);
+            charset = BrowserMobHttpUtil.readCharsetInContentTypeHeader(contentType);
         } catch (UnsupportedCharsetException e) {
             log.warn("Found unsupported character set in Content-Type header '{}' in HTTP request to {}. Content will not be captured in HAR.", contentType, httpRequest.getUri(), e);
             return;
@@ -651,6 +659,7 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
     public void proxyToServerResolutionFailed(String hostAndPort) {
         HarResponse response = HarCaptureUtil.createHarResponseForFailure();
         harEntry.setResponse(response);
+        statsDClient.increment(getProxyPrefix().concat("server_resolution_fail.").concat(prepareMetric(harEntry.getRequest().getUrl())).concat(harEntry.getResponse().getStatusText()));
 
         response.setError(HarCaptureUtil.getResolutionFailedErrorMessage(hostAndPort));
 
@@ -692,6 +701,7 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
     @Override
     public void proxyToServerConnectionFailed() {
         HarResponse response = HarCaptureUtil.createHarResponseForFailure();
+        statsDClient.increment(getProxyPrefix().concat("server_connection_fail.").concat(prepareMetric(harEntry.getRequest().getUrl())).concat(harEntry.getResponse().getStatusText()));
         harEntry.setResponse(response);
 
         response.setError(HarCaptureUtil.getConnectionFailedErrorMessage());
