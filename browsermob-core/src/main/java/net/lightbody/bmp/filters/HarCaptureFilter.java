@@ -204,8 +204,8 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
             // for any other reason. having a "default" HarResponse prevents us from generating an invalid HAR.
             HarResponse defaultHarResponse = HarCaptureUtil.createHarResponseForFailure();
             defaultHarResponse.setError(HarCaptureUtil.getNoResponseReceivedErrorMessage());
-            statsDClient.increment(getProxyPrefix().concat("client_proxy_connection_fail.").concat(prepareMetric(harEntry.getRequest().getUrl())).concat(harEntry.getResponse().getStatusText()));
             harEntry.setResponse(defaultHarResponse);
+            statsDClient.increment(getProxyPrefix().concat("client_proxy_connection_fail.").concat(prepareMetric(harEntry.getRequest().getUrl())).concat(String.valueOf(harEntry.getResponse().getStatus())));
 
             captureQueryParameters(httpRequest);
             // not capturing user agent: in many cases, it doesn't make sense to capture at the HarLog level, since the proxy could be
