@@ -334,7 +334,8 @@ public class HttpConnectHarCaptureFilter extends HttpsAwareFiltersAdapter implem
 
         HarResponse response = HarCaptureUtil.createHarResponseForFailure();
         harEntry.setResponse(response);
-        statsDClient.increment(getProxyPrefix().concat("failed_connect_request.").concat(prepareMetric(harEntry.getRequest().getUrl())).concat(harEntry.getResponse().getStatusText()));
+        statsDClient.increment(getProxyPrefix().concat(prepareMetric(harEntry.getRequest().getUrl()))
+                .concat("." + harEntry.getResponse().getStatus()).concat(".failed_connect_request"));
 
         response.setError(errorMessage);
 

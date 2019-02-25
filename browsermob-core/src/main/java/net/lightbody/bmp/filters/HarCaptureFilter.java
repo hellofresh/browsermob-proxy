@@ -205,7 +205,8 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
             HarResponse defaultHarResponse = HarCaptureUtil.createHarResponseForFailure();
             defaultHarResponse.setError(HarCaptureUtil.getNoResponseReceivedErrorMessage());
             harEntry.setResponse(defaultHarResponse);
-            statsDClient.increment(getProxyPrefix().concat("client_proxy_connection_fail.").concat(prepareMetric(harEntry.getRequest().getUrl())).concat(String.valueOf(harEntry.getResponse().getStatus())));
+            statsDClient.increment(getProxyPrefix().concat(prepareMetric(harEntry.getRequest().getUrl()))
+                    .concat("." + harEntry.getResponse().getStatus()).concat(".client_proxy_connection_fail"));
 
             captureQueryParameters(httpRequest);
             // not capturing user agent: in many cases, it doesn't make sense to capture at the HarLog level, since the proxy could be
@@ -285,7 +286,8 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
         // replace any existing HarResponse that was created if the server sent a partial response
         HarResponse response = HarCaptureUtil.createHarResponseForFailure();
         harEntry.setResponse(response);
-        statsDClient.increment(getProxyPrefix().concat("response_timeout.").concat(prepareMetric(harEntry.getRequest().getUrl())).concat(harEntry.getResponse().getStatusText()));
+        statsDClient.increment(getProxyPrefix().concat(prepareMetric(harEntry.getRequest().getUrl()))
+                .concat("." + harEntry.getResponse().getStatus()).concat(".response_timeout"));
 
         response.setError(HarCaptureUtil.getResponseTimedOutErrorMessage());
 
@@ -659,7 +661,8 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
     public void proxyToServerResolutionFailed(String hostAndPort) {
         HarResponse response = HarCaptureUtil.createHarResponseForFailure();
         harEntry.setResponse(response);
-        statsDClient.increment(getProxyPrefix().concat("server_resolution_fail.").concat(prepareMetric(harEntry.getRequest().getUrl())).concat(harEntry.getResponse().getStatusText()));
+        statsDClient.increment(getProxyPrefix().concat(prepareMetric(harEntry.getRequest().getUrl()))
+                .concat("." + harEntry.getResponse().getStatus()).concat(".server_resolution_fail"));
 
         response.setError(HarCaptureUtil.getResolutionFailedErrorMessage(hostAndPort));
 
@@ -701,7 +704,8 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
     @Override
     public void proxyToServerConnectionFailed() {
         HarResponse response = HarCaptureUtil.createHarResponseForFailure();
-        statsDClient.increment(getProxyPrefix().concat("server_connection_fail.").concat(prepareMetric(harEntry.getRequest().getUrl())).concat(harEntry.getResponse().getStatusText()));
+        statsDClient.increment(getProxyPrefix().concat(prepareMetric(harEntry.getRequest().getUrl()))
+                .concat("." + harEntry.getResponse().getStatus()).concat(".server_connection_fail"));
         harEntry.setResponse(response);
 
         response.setError(HarCaptureUtil.getConnectionFailedErrorMessage());

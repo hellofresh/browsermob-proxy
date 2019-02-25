@@ -43,15 +43,10 @@ public class StatsDMetricsFilter extends HttpsAwareFiltersAdapter {
             if (status > 399 || status == 0) {
                 String metric;
                 String url = HTTP_RESPONSE_STACK.pop();
-                try {
-                    URI uri = new URI(url);
-                    metric = getProxyPrefix().concat(
-                            prepareMetric(uri.getHost().concat(uri.getPath())).concat(String.format(".%s", status)));
-                    client.increment(metric);
-                    HTTP_RESPONSE_STACK.clear();
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                }
+                metric = getProxyPrefix().concat(
+                        prepareMetric(url)).concat(String.format(".%s", status));
+                client.increment(metric);
+                HTTP_RESPONSE_STACK.clear();
             }
         }
         return super.serverToProxyResponse(httpObject);
@@ -70,7 +65,14 @@ public class StatsDMetricsFilter extends HttpsAwareFiltersAdapter {
     }
 
     public static String prepareMetric(String initialUrl) {
-        return initialUrl.replaceAll("/", "_").replaceAll("\\.", "_");
+        URI uri = null;
+        try {
+            uri = new URI(initialUrl);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return uri.getHost().concat(uri.getPath()).replaceAll("/", "_")
+                .replaceAll("\\.", "_");
     }
 
 }
