@@ -186,7 +186,7 @@
                         <execution>
                             <id>install-external</id>
                             <inherited>false</inherited>
-                            <phase>clean</phase>
+                            <phase>install</phase>
                             <configuration>
                                 <file>${basedir}/resources/jar/littleproxy-1.1.3.jar</file>
                                 <repositoryLayout>default</repositoryLayout>
