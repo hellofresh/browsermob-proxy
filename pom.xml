@@ -293,7 +293,7 @@
                 <artifactId>littleproxy</artifactId>
                 <version>1.1.3</version>
                 <scope>system</scope>
-                <systemPath>${project.basedir}/browsermob-core/src/main/resources/jar/littleproxy-1.1.3.jar</systemPath>
+                <systemPath>${project.basedir}/resources/jar/littleproxy-1.1.3.jar</systemPath>
             </dependency>
 
 
