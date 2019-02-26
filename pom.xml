@@ -17,7 +17,7 @@
     <packaging>pom</packaging>
 
     <prerequisites>
-        <maven>3.3.1</maven>
+        <maven>3.0.4</maven>
     </prerequisites>
 
     <licenses>
