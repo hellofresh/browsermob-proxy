@@ -566,4 +566,12 @@
             </properties>
         </profile>
     </profiles>
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>artifactory-artifactory-0-releases</name>
+            <url>https://artifactory.tools-k8s.hellofresh.io/artifactory/maven</url>
+        </repository>
+    </repositories>
 </project>
