@@ -292,6 +292,8 @@
                 <groupId>org.littleshoot</groupId>
                 <artifactId>littleproxy</artifactId>
                 <version>1.1.3</version>
+                <scope>system</scope>
+                <systemPath>${project.basedir}/browsermob-core/src/main/resources/jar/littleproxy-1.1.3.jar</systemPath>
             </dependency>
 
 
@@ -566,12 +568,4 @@
             </properties>
         </profile>
     </profiles>
-
-    <repositories>
-        <repository>
-            <id>central</id>
-            <name>artifactory-artifactory-0-releases</name>
-            <url>https://artifactory.tools-k8s.hellofresh.io/artifactory/maven</url>
-        </repository>
-    </repositories>
 </project>
