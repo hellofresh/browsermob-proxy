@@ -46,20 +46,7 @@
         <url>git@github.com:lightbody/browsermob-proxy.git</url>
         <tag>HEAD</tag>
     </scm>
-
-    <distributionManagement>
-        <repository>
-            <id>central</id>
-            <name>artifactory-artifactory-0-releases</name>
-            <url>https://artifactory.tools-k8s.hellofresh.io/artifactory/maven</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <name>artifactory-artifactory-0-snapshots</name>
-            <url>https://artifactory.tools-k8s.hellofresh.io/artifactory/maven</url>
-        </snapshotRepository>
-    </distributionManagement>
-
+    
     <pluginRepositories>
         <pluginRepository>
             <id>bintray</id>
@@ -195,7 +182,6 @@
                                 <artifactId>littleproxy</artifactId>
                                 <version>1.1.3</version>
                                 <packaging>jar</packaging>
-                                <pomFile>${basedir}/resources/jar/littleproxy-1.1.3.pom</pomFile>
                             </configuration>
                             <goals>
                                 <goal>install-file</goal>
