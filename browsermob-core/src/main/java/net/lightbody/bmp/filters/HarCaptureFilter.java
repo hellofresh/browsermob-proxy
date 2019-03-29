@@ -10,14 +10,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.ClientCookieDecoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
-import net.lightbody.bmp.core.har.Har;
-import net.lightbody.bmp.core.har.HarCookie;
-import net.lightbody.bmp.core.har.HarEntry;
-import net.lightbody.bmp.core.har.HarNameValuePair;
-import net.lightbody.bmp.core.har.HarPostData;
-import net.lightbody.bmp.core.har.HarPostDataParam;
-import net.lightbody.bmp.core.har.HarRequest;
-import net.lightbody.bmp.core.har.HarResponse;
+import net.lightbody.bmp.core.har.*;
 import net.lightbody.bmp.exception.UnsupportedCharsetException;
 import net.lightbody.bmp.filters.support.HttpConnectTiming;
 import net.lightbody.bmp.filters.util.HarCaptureUtil;
@@ -33,22 +26,17 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.lightbody.bmp.filters.StatsDMetricsFilter.*;
-import static net.lightbody.bmp.filters.StatsDMetricsFilter.getStatsDPort;
 
 public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
     private static final Logger log = LoggerFactory.getLogger(HarCaptureFilter.class);
     private static final ThreadLocal<StatsDClient> statsDClient = new InheritableThreadLocal<>();
     private static final ThreadLocal<Boolean> isAlreadyLoggedIn = InheritableThreadLocal.withInitial(() -> false);
+    private static final ThreadLocal<HttpObject> httpObjectThreadLocal = new InheritableThreadLocal<>();
 
     /**
      * The currently active HAR at the time the current request is received.
@@ -251,30 +239,32 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
     public HttpObject serverToProxyResponse(HttpObject httpObject) {
         // if a ServerResponseCaptureFilter is configured, delegate to it to collect the server's response. if it is not
         // configured, we still need to capture basic information (timings, HTTP status, etc.), just not content.
-        if (responseCaptureFilter != null) {
-            responseCaptureFilter.serverToProxyResponse(httpObject);
-        }
-
-        if (httpObject instanceof HttpResponse) {
-            HttpResponse httpResponse = (HttpResponse) httpObject;
-
-            captureResponse(httpResponse);
-        }
-
-        if (httpObject instanceof HttpContent) {
-            HttpContent httpContent = (HttpContent) httpObject;
-
-            captureResponseSize(httpContent);
-        }
-
-        if (httpObject instanceof LastHttpContent) {
-            if (dataToCapture.contains(CaptureType.RESPONSE_CONTENT)) {
-                captureResponseContent(responseCaptureFilter.getHttpResponse(), responseCaptureFilter.getFullResponseContents());
+        if (Objects.isNull(httpObjectThreadLocal.get()) || httpObjectThreadLocal.get().hashCode() != httpObject.hashCode()) {
+            if (responseCaptureFilter != null) {
+                responseCaptureFilter.serverToProxyResponse(httpObject);
             }
 
-            harEntry.getResponse().setBodySize(responseBodySize.get());
-        }
+            if (httpObject instanceof HttpResponse) {
+                HttpResponse httpResponse = (HttpResponse) httpObject;
 
+                captureResponse(httpResponse);
+            }
+
+            if (httpObject instanceof HttpContent) {
+                HttpContent httpContent = (HttpContent) httpObject;
+
+                captureResponseSize(httpContent);
+            }
+
+            if (httpObject instanceof LastHttpContent) {
+                if (dataToCapture.contains(CaptureType.RESPONSE_CONTENT)) {
+                    captureResponseContent(responseCaptureFilter.getHttpResponse(), responseCaptureFilter.getFullResponseContents());
+                }
+
+                harEntry.getResponse().setBodySize(responseBodySize.get());
+            }
+            httpObjectThreadLocal.set(httpObject);
+        }
         logFailedRequestIfRequired(harEntry.getRequest(), harEntry.getResponse());
 
         return super.serverToProxyResponse(httpObject);
@@ -307,6 +297,8 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
         else if (responseReceiveStartedNanos > 0L) {
             harEntry.getTimings().setReceive(timeoutTimestampNanos - responseReceiveStartedNanos, TimeUnit.NANOSECONDS);
         }
+
+        logFailedRequestIfRequired(harEntry.getRequest(), harEntry.getResponse());
     }
 
     /**
