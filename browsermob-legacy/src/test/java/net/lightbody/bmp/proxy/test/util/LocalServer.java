@@ -5,9 +5,9 @@ import net.lightbody.bmp.proxy.test.servlet.EchoServlet;
 import net.lightbody.bmp.proxy.test.servlet.JsonServlet;
 import net.lightbody.bmp.proxy.test.servlet.SetCookieServlet;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.GzipHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.util.resource.Resource;
 import org.slf4j.Logger;
@@ -63,7 +63,7 @@ public class LocalServer {
             throw new RuntimeException("Could not start local Jetty server for tests", e);
         }
 
-        this.port = server.getURI().getPort();
+        this.port = server.getConnectors()[0].getLocalPort();
 
         started.set(true);
     }
@@ -78,7 +78,7 @@ public class LocalServer {
     }
 
     /**
-     * Forces the server to gzip all responses (see {@link org.eclipse.jetty.server.handler.gzip.GzipHandler} for response codes that will
+     * Forces the server to gzip all responses (see {@link org.eclipse.jetty.server.handler.GzipHandler} for response codes that will
      * be gzipped).
      */
     public void forceGzip() {
