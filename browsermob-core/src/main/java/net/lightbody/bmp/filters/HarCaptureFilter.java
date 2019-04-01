@@ -36,7 +36,6 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
     private static final Logger log = LoggerFactory.getLogger(HarCaptureFilter.class);
     private static final ThreadLocal<StatsDClient> statsDClient = new InheritableThreadLocal<>();
     private static final ThreadLocal<Boolean> isAlreadyLoggedIn = InheritableThreadLocal.withInitial(() -> false);
-    private static final ThreadLocal<HttpObject> httpObjectThreadLocal = new InheritableThreadLocal<>();
 
     /**
      * The currently active HAR at the time the current request is received.
@@ -239,32 +238,30 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
     public HttpObject serverToProxyResponse(HttpObject httpObject) {
         // if a ServerResponseCaptureFilter is configured, delegate to it to collect the server's response. if it is not
         // configured, we still need to capture basic information (timings, HTTP status, etc.), just not content.
-        if (Objects.isNull(httpObjectThreadLocal.get()) || httpObjectThreadLocal.get().hashCode() != httpObject.hashCode()) {
-            if (responseCaptureFilter != null) {
-                responseCaptureFilter.serverToProxyResponse(httpObject);
-            }
-
-            if (httpObject instanceof HttpResponse) {
-                HttpResponse httpResponse = (HttpResponse) httpObject;
-
-                captureResponse(httpResponse);
-            }
-
-            if (httpObject instanceof HttpContent) {
-                HttpContent httpContent = (HttpContent) httpObject;
-
-                captureResponseSize(httpContent);
-            }
-
-            if (httpObject instanceof LastHttpContent) {
-                if (dataToCapture.contains(CaptureType.RESPONSE_CONTENT)) {
-                    captureResponseContent(responseCaptureFilter.getHttpResponse(), responseCaptureFilter.getFullResponseContents());
-                }
-
-                harEntry.getResponse().setBodySize(responseBodySize.get());
-            }
-            httpObjectThreadLocal.set(httpObject);
+        if (responseCaptureFilter != null) {
+            responseCaptureFilter.serverToProxyResponse(httpObject);
         }
+
+        if (httpObject instanceof HttpResponse) {
+            HttpResponse httpResponse = (HttpResponse) httpObject;
+
+            captureResponse(httpResponse);
+        }
+
+        if (httpObject instanceof HttpContent) {
+            HttpContent httpContent = (HttpContent) httpObject;
+
+            captureResponseSize(httpContent);
+        }
+
+        if (httpObject instanceof LastHttpContent) {
+            if (dataToCapture.contains(CaptureType.RESPONSE_CONTENT)) {
+                captureResponseContent(responseCaptureFilter.getHttpResponse(), responseCaptureFilter.getFullResponseContents());
+            }
+
+            harEntry.getResponse().setBodySize(responseBodySize.get());
+        }
+
         logFailedRequestIfRequired(harEntry.getRequest(), harEntry.getResponse());
 
         return super.serverToProxyResponse(httpObject);
