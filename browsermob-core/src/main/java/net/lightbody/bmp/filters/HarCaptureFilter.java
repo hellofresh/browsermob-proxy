@@ -260,10 +260,9 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
             }
 
             harEntry.getResponse().setBodySize(responseBodySize.get());
+            logFailedRequestIfRequired(harEntry.getRequest(), harEntry.getResponse());
         }
-
-        logFailedRequestIfRequired(harEntry.getRequest(), harEntry.getResponse());
-
+        
         return super.serverToProxyResponse(httpObject);
     }
 
