@@ -40,19 +40,19 @@ public class StatsDMetricsFilter extends HttpsAwareFiltersAdapter {
     }
 
 
-    static String getStatsDHost() {
+    protected static String getStatsDHost() {
         return StringUtils.isEmpty(System.getenv("STATSD_HOST")) ? "localhost" : System.getenv("STATSD_HOST");
     }
 
-    static int getStatsDPort() {
+    protected static int getStatsDPort() {
         return StringUtils.isEmpty(System.getenv("STATSD_PORT")) ? 8125 : NumberUtils.toInt(System.getenv("STATSD_PORT"));
     }
 
-    public static String getProxyPrefix() {
+    protected static String getProxyPrefix() {
         return "proxy.";
     }
 
-    public static String prepareMetric(String initialUrl) {
+    protected static String prepareMetric(String initialUrl) {
         URI uri = null;
         try {
             uri = new URI(initialUrl);
