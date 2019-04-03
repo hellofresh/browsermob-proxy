@@ -8,28 +8,15 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.littleshoot.proxy.HttpFiltersAdapter;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
 public class StatsDMetricsFilter extends HttpsAwareFiltersAdapter {
-    private StatsDClient client;
-    private static InheritableThreadLocal<HttpRequest> HTTP_REQUEST_STORAGE = new InheritableThreadLocal<>();
-
     public StatsDMetricsFilter(HttpRequest originalRequest, ChannelHandlerContext ctx) {
         super(originalRequest, ctx);
-        this.client = new NonBlockingStatsDClient("automated_tests", getStatsDHost(), getStatsDPort());
     }
-
-    @Override
-    public HttpResponse clientToProxyRequest(HttpObject httpObject) {
-        if (httpObject instanceof HttpRequest) {
-            HttpRequest httpRequest = (HttpRequest) httpObject;
-            HTTP_REQUEST_STORAGE.set(httpRequest);
-        }
-        return null;
-    }
-
 
     @Override
     public HttpObject serverToProxyResponse(HttpObject httpObject) {
@@ -42,14 +29,13 @@ public class StatsDMetricsFilter extends HttpsAwareFiltersAdapter {
     }
 
     private void prepareStatsDMetrics(int status) {
-        if (status > 399 || status == 0) {
-            String metric;
-            HttpRequest request = HTTP_REQUEST_STORAGE.get();
-            String url = getFullUrl(request);
-            metric = getProxyPrefix().concat(
+        if (status > 0 || status == 0) {
+            String url = getFullUrl(originalRequest);
+            String metric = getProxyPrefix().concat(
                     prepareMetric(url)).concat(String.format(".%s", status));
+            StatsDClient client = new NonBlockingStatsDClient("automated_tests", getStatsDHost(), getStatsDPort());
             client.increment(metric);
-            HTTP_REQUEST_STORAGE.remove();
+            client.stop();
         }
     }
 
