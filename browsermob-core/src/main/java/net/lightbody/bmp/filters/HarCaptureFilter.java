@@ -208,7 +208,6 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
             // HTTP CONNECT is not recorded in a separate HarEntry (except in case of error). Instead, the ssl and
             // connect times are recorded in the first request between the client and remote server after the HTTP CONNECT.
             captureConnectTiming();
-            logFailedRequestIfRequired(harEntry.getRequest(), harEntry.getResponse());
         }
 
         if (httpObject instanceof HttpContent) {
