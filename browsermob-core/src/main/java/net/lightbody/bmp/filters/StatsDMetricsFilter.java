@@ -3,12 +3,12 @@ package net.lightbody.bmp.filters;
 import com.timgroup.statsd.NonBlockingStatsDClient;
 import com.timgroup.statsd.StatsDClient;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.littleshoot.proxy.HttpFiltersAdapter;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,17 +19,16 @@ public class StatsDMetricsFilter extends HttpsAwareFiltersAdapter {
     }
 
     @Override
-    public HttpObject serverToProxyResponse(HttpObject httpObject) {
-        if (HttpResponse.class.isAssignableFrom(httpObject.getClass())) {
-            HttpResponse httpResponse = (HttpResponse) httpObject;
-            int status = httpResponse.status().code();
-            prepareStatsDMetrics(status);
+    public HttpObject proxyToClientResponse(HttpObject httpObject) {
+        if (FullHttpResponse.class.isAssignableFrom(httpObject.getClass())) {
+            HttpResponse httpResponse = (FullHttpResponse) httpObject;
+            prepareStatsDMetrics(httpResponse.status().code());
         }
         return super.serverToProxyResponse(httpObject);
     }
 
     private void prepareStatsDMetrics(int status) {
-        if (status > 399 || status == 0) {
+        if (status > 399) {
             String url = getFullUrl(originalRequest);
             String metric = getProxyPrefix().concat(
                     prepareMetric(url)).concat(String.format(".%s", status));
