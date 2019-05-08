@@ -28,7 +28,7 @@ public class StatsDMetricsFilter extends HttpsAwareFiltersAdapter {
     }
 
     private void prepareStatsDMetrics(int status) {
-        if (status > 399) {
+        if (status > 399 || status == 0) {
             String url = getFullUrl(originalRequest);
             String metric = getProxyPrefix().concat(
                     prepareMetric(url)).concat(String.format(".%s", status));
