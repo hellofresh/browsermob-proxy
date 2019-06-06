@@ -23,7 +23,7 @@ public class StatsDMetricsFilter extends HttpsAwareFiltersAdapter {
             HttpResponse httpResponse = (HttpResponse) httpObject;
             prepareStatsDMetrics(httpResponse.status().code());
         }
-        return null;
+        return super.serverToProxyResponse(httpObject);
     }
 
     private void prepareStatsDMetrics(int status) {
