@@ -17,7 +17,6 @@
             <!-- Temporarily using the BMP release of littleproxy because LP 1.1.2 is incompatible with guava 22+ -->
             <groupId>org.littleshoot</groupId>
             <artifactId>littleproxy</artifactId>
-            <version>1.1.5</version>
             <optional>true</optional>
             <exclusions>
                 <exclusion>
