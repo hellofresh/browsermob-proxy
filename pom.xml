@@ -84,6 +84,7 @@
         <bouncycastle.version>1.64</bouncycastle.version>
         <java-statsd-client.version>3.0.1</java-statsd-client.version>
         <java.version>8</java.version>
+        <additionalJOption>-Xdoclint:none</additionalJOption>
     </properties>
 
     <build>
@@ -152,7 +153,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.10.4</version>
+                    <version>3.1.1</version>
                     <executions>
                         <execution>
                             <id>attach-javadocs</id>
@@ -161,7 +162,7 @@
                                 <goal>jar</goal>
                             </goals>
                             <configuration>
-                                <additionalparam>${javadoc.opts}</additionalparam>
+                                <additionalJOption>${additionalJOption}</additionalJOption>
                             </configuration>
                         </execution>
                     </executions>
