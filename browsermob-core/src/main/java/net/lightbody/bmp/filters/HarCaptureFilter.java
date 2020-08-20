@@ -22,6 +22,7 @@ import org.fluentd.logger.FluentLogger;
 import org.littleshoot.proxy.impl.ProxyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -780,17 +781,25 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
     }
 
     protected static void logFailedRequestIfRequired(HarRequest request, HarResponse response) {
-        if (Objects.nonNull(LOG) &&
-                (Objects.isNull(isAlreadyLoggedIn.get()) || isAlreadyLoggedIn.get().hashCode() != request.hashCode())
+        if ((Objects.isNull(isAlreadyLoggedIn.get()) || isAlreadyLoggedIn.get().hashCode() != request.hashCode())
                 && (response.getStatus() >= 500 || response.getStatus() == 0)) {
-            Map<String, Object> data = new HashMap<String, Object>();
-            data.put("caller", "mobproxy");
-            data.put("http_response_code", String.valueOf(response.getStatus()));
-            data.put("http_host", request.getUrl());
-            data.put("request_details", BeansJsonMapper.getJsonString(request));
-            data.put("method", request.getMethod());
-            data.put("response", BeansJsonMapper.getJsonString(response));
-            LOG.log("failure", data);
+            if (Objects.nonNull(LOG)) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("caller", "mobproxy");
+                data.put("http_response_code", String.valueOf(response.getStatus()));
+                data.put("http_host", request.getUrl());
+                data.put("request_details", BeansJsonMapper.getJsonString(request));
+                data.put("method", request.getMethod());
+                data.put("response", BeansJsonMapper.getJsonString(response));
+                LOG.log("failure", data);
+            }
+            MDC.put("caller", "mobproxy");
+            MDC.put("http_response_code", String.valueOf(response.getStatus()));
+            MDC.put("http_host", request.getUrl());
+            MDC.put("request_details", BeansJsonMapper.getJsonString(request));
+            MDC.put("method", request.getMethod());
+            MDC.put("response", BeansJsonMapper.getJsonString(response));
+            log.error("received bad status code");
             isAlreadyLoggedIn.set(request);
         }
     }
