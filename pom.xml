@@ -240,9 +240,9 @@
             </dependency>
 
             <dependency>
-                <groupId>io.github.elbryan</groupId>
-                <artifactId>fluentd4log4j_2.11</artifactId>
-                <version>1.0</version>
+                <groupId>com.twimba</groupId>
+                <artifactId>fluentd4log4j</artifactId>
+                <version>1.0.1</version>
             </dependency>
 
             <dependency>
