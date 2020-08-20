@@ -56,10 +56,6 @@ public class SunJsseListener extends JsseListener {
     private String _keystore_provider_class = DEFAULT_KEYSTORE_PROVIDER_CLASS;
     private boolean _useDefaultTrustStore = false;
 
-    /* ------------------------------------------------------------ */
-    static {
-        Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
-    }
 
     /* ------------------------------------------------------------ */
     public void setKeystore(String keystore) {
