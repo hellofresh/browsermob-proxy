@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+    <moRdelVersion>4.0.0</moRdelVersion>
     <groupId>net.lightbody.bmp</groupId>
     <artifactId>browsermob-proxy</artifactId>
-    <version>2.1.37</version>
+    <version>2.1.38</version>
     <modules>
         <module>browsermob-core</module>
         <module>browsermob-legacy</module>
@@ -177,11 +177,11 @@
                             <inherited>false</inherited>
                             <phase>install</phase>
                             <configuration>
-                                <file>${basedir}/resources/jar/littleproxy-1.1.6.jar</file>
+                                <file>${basedir}/resources/jar/littleproxy-1.1.7.jar</file>
                                 <repositoryLayout>default</repositoryLayout>
                                 <groupId>org.littleshoot</groupId>
                                 <artifactId>littleproxy</artifactId>
-                                <version>1.1.6</version>
+                                <version>1.1.7</version>
                                 <packaging>jar</packaging>
                             </configuration>
                             <goals>
@@ -315,7 +315,7 @@
             <dependency>
                 <groupId>org.littleshoot</groupId>
                 <artifactId>littleproxy</artifactId>
-                <version>1.1.6</version>
+                <version>1.1.7</version>
             </dependency>
 
 
