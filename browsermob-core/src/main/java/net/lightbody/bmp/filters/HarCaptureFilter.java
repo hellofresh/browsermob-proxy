@@ -793,7 +793,8 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
     }
 
     protected static void logFailedRequestIfRequired(HarRequest request, HarResponse response) {
-        if ((Objects.isNull(isAlreadyLoggedIn.get()) || isAlreadyLoggedIn.get().hashCode() != request.hashCode())
+        if ((Objects.isNull(isAlreadyLoggedIn.get()) ||
+                isAlreadyLoggedIn.get().hashCode() != request.hashCode())
                 && (response.getStatus() >= 500 || response.getStatus() == 0)) {
             MDC.put("caller", "mobproxy");
             MDC.put("http_response_code", String.valueOf(response.getStatus()));
