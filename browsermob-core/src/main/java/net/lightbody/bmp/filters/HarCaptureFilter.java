@@ -34,7 +34,6 @@ import net.lightbody.bmp.util.BeansJsonMapper;
 import net.lightbody.bmp.util.BrowserMobHttpUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
 import org.apache.logging.log4j.message.StringMapMessage;
 import org.littleshoot.proxy.impl.ProxyUtils;
 
@@ -58,7 +57,8 @@ import static net.lightbody.bmp.filters.StatsDMetricsFilter.getStatsDPort;
 import static net.lightbody.bmp.filters.StatsDMetricsFilter.prepareMetric;
 
 public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(HarCaptureFilter.class);
+
     private static final InheritableThreadLocal<HarRequest> isAlreadyLoggedIn = new InheritableThreadLocal<>();
 
     /**
@@ -806,7 +806,6 @@ public class HarCaptureFilter extends HttpsAwareFiltersAdapter {
                     .with("method", request.getMethod())
                     .with("response", BeansJsonMapper.getJsonString(response)));
             isAlreadyLoggedIn.set(request);
-            ThreadContext.clearMap();
         }
     }
 
