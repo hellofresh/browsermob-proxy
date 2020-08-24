@@ -70,12 +70,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.fluentd</groupId>
-            <artifactId>fluent-logger</artifactId>
-        </dependency>
-
-
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
@@ -268,6 +262,10 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
         </dependency>
     </dependencies>
 </project>
